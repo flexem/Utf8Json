@@ -294,7 +294,7 @@ namespace Utf8Json
 #endif
         public void WriteByte(byte value)
         {
-            WriteUInt64((ulong)value);
+            offset += NumberConverter.WriteUInt64(ref buffer, offset, value);
         }
 
 #if NETSTANDARD
@@ -302,7 +302,7 @@ namespace Utf8Json
 #endif
         public void WriteUInt16(ushort value)
         {
-            WriteUInt64((ulong)value);
+            offset += NumberConverter.WriteUInt64(ref buffer, offset, value);
         }
 
 #if NETSTANDARD
@@ -310,12 +310,16 @@ namespace Utf8Json
 #endif
         public void WriteUInt32(uint value)
         {
-            WriteUInt64((ulong)value);
+            offset += NumberConverter.WriteUInt64(ref buffer, offset, value);
         }
 
         public void WriteUInt64(ulong value)
         {
+            BinaryUtil.EnsureCapacity(ref buffer, offset, 2);
+            buffer[offset++] = (byte)'\"';
             offset += NumberConverter.WriteUInt64(ref buffer, offset, value);
+            BinaryUtil.EnsureCapacity(ref buffer, offset, 1);
+            buffer[offset++] = (byte)'\"';
         }
 
 #if NETSTANDARD
@@ -323,7 +327,7 @@ namespace Utf8Json
 #endif
         public void WriteSByte(sbyte value)
         {
-            WriteInt64((long)value);
+            offset += NumberConverter.WriteInt64(ref buffer, offset, value);
         }
 
 #if NETSTANDARD
@@ -331,7 +335,7 @@ namespace Utf8Json
 #endif
         public void WriteInt16(short value)
         {
-            WriteInt64((long)value);
+            offset += NumberConverter.WriteInt64(ref buffer, offset, value);
         }
 
 #if NETSTANDARD
@@ -339,12 +343,16 @@ namespace Utf8Json
 #endif
         public void WriteInt32(int value)
         {
-            WriteInt64((long)value);
+            offset += NumberConverter.WriteInt64(ref buffer, offset, value);
         }
 
         public void WriteInt64(long value)
         {
+            BinaryUtil.EnsureCapacity(ref buffer, offset, 2);
+            buffer[offset++] = (byte)'\"';
             offset += NumberConverter.WriteInt64(ref buffer, offset, value);
+            BinaryUtil.EnsureCapacity(ref buffer, offset, 1);
+            buffer[offset++] = (byte)'\"';
         }
 
         public void WriteString(string value)
