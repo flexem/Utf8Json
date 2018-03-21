@@ -379,7 +379,10 @@ namespace Utf8Json
             for (int i = 0; i < value.Length; i++)
             {
                 byte escapeChar = default(byte);
-                switch (value[i])
+                var c = value[i];
+                char unicode2 = '\0';
+                char unicode3 = '\0';
+                switch (c)
                 {
                     case '"':
                         escapeChar = (byte)'"';
@@ -430,6 +433,48 @@ namespace Utf8Json
                     case (char)29:
                     case (char)30:
                     case (char)31:
+                    case (char)127:
+                    case (char)128:
+                    case (char)129:
+                    case (char)131:
+                    case (char)132:
+                    case (char)133:
+                    case (char)134:
+                    case (char)135:
+                    case (char)136:
+                    case (char)137:
+                    case (char)138:
+                    case (char)139:
+                    case (char)140:
+                    case (char)141:
+                    case (char)142:
+                    case (char)143:
+                    case (char)144:
+                    case (char)145:
+                    case (char)146:
+                    case (char)147:
+                    case (char)148:
+                    case (char)149:
+                    case (char)150:
+                    case (char)151:
+                    case (char)152:
+                    case (char)153:
+                    case (char)154:
+                    case (char)155:
+                    case (char)156:
+                    case (char)157:
+                    case (char)158:
+                    case (char)159:
+                        escapeChar = (byte)'u';
+                        unicode2 = (char) (c >> 4);
+                        unicode2 = unicode2 < 10 ? (char) (unicode2 + 48) : (char) (unicode2 + 55);
+                        unicode3 = (char) (c & 4);
+                        unicode3 = unicode3 < 10 ? (char)(unicode3 + 48) : (char)(unicode3 + 55);
+                        max += 4;
+                        break;
+
+
+
                     case (char)32:
                     case (char)33:
                     case (char)35:
@@ -500,6 +545,11 @@ namespace Utf8Json
                 from = i + 1;
                 buffer[offset++] = (byte)'\\';
                 buffer[offset++] = escapeChar;
+                if (escapeChar != (byte) 'u') continue;
+                buffer[offset++] = (byte) '0';
+                buffer[offset++] = (byte) '0';
+                buffer[offset++] = (byte) unicode2;
+                buffer[offset++] = (byte) unicode3;
             }
 
             if (from != value.Length)
