@@ -16,6 +16,9 @@ namespace Utf8Json.Resolvers
         public static readonly IJsonFormatterResolver ExcludeNull = ExcludeNullStandardResolver.Instance;
         /// <summary>AllowPrivate:False, ExcludeNull:True,  NameMutate:CamelCase</summary>
         public static readonly IJsonFormatterResolver ExcludeNullCamelCase = ExcludeNullCamelCaseStandardResolver.Instance;
+
+        public static readonly IJsonFormatterResolver ExcludeNullCamelCasePropertyValueByEnumUnderlyingValue =
+            ExcludeNullCamelCasePropertyValueByEnumUnderlyingValueStandardResolver.Instance;
         /// <summary>AllowPrivate:False, ExcludeNull:True,  NameMutate:SnakeCase</summary>
         public static readonly IJsonFormatterResolver ExcludeNullSnakeCase = ExcludeNullSnakeCaseStandardResolver.Instance;
 
@@ -360,6 +363,84 @@ namespace Utf8Json.Resolvers.Internal
             public static readonly IJsonFormatterResolver Instance = new InnerResolver();
 
             static readonly IJsonFormatterResolver[] resolvers = StandardResolverHelper.CompositeResolverBase.Concat(new[] { DynamicObjectResolver.ExcludeNullCamelCase }).ToArray();
+
+            InnerResolver()
+            {
+            }
+
+            public IJsonFormatter<T> GetFormatter<T>()
+            {
+                return FormatterCache<T>.formatter;
+            }
+
+            static class FormatterCache<T>
+            {
+                public static readonly IJsonFormatter<T> formatter;
+
+                static FormatterCache()
+                {
+                    foreach (var item in resolvers)
+                    {
+                        var f = item.GetFormatter<T>();
+                        if (f != null)
+                        {
+                            formatter = f;
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    internal sealed class ExcludeNullCamelCasePropertyValueByEnumUnderlyingValueStandardResolver : IJsonFormatterResolver
+    {
+        // configure
+        public static readonly IJsonFormatterResolver Instance = new ExcludeNullCamelCasePropertyValueByEnumUnderlyingValueStandardResolver();
+
+        static readonly IJsonFormatter<object> fallbackFormatter = new DynamicObjectTypeFallbackFormatter(InnerResolver.Instance);
+
+        ExcludeNullCamelCasePropertyValueByEnumUnderlyingValueStandardResolver()
+        {
+        }
+
+        public IJsonFormatter<T> GetFormatter<T>()
+        {
+            return FormatterCache<T>.formatter;
+        }
+
+        static class FormatterCache<T>
+        {
+            public static readonly IJsonFormatter<T> formatter;
+
+            static FormatterCache()
+            {
+                if (typeof(T) == typeof(object))
+                {
+                    formatter = (IJsonFormatter<T>)fallbackFormatter;
+                }
+                else
+                {
+                    formatter = InnerResolver.Instance.GetFormatter<T>();
+                }
+            }
+        }
+
+        sealed class InnerResolver : IJsonFormatterResolver
+        {
+            public static readonly IJsonFormatterResolver Instance = new InnerResolver();
+
+            private static readonly IJsonFormatterResolver[] resolvers = new[]
+                {
+                    BuiltinResolver.Instance, // Builtin
+#if !NETSTANDARD
+            Utf8Json.Unity.UnityResolver.Instance,
+#endif
+                    EnumResolver.UnderlyingValueOfPropertyValueOnly,
+                    DynamicGenericResolver.Instance, // T[], List<T>, etc...
+                    AttributeFormatterResolver.Instance // [JsonFormatter]
+                }
+                .Concat(new[] {DynamicObjectResolver.ExcludeNullCamelCasePropertyValueByEnumUnderlyingValue}).ToArray();
 
             InnerResolver()
             {
