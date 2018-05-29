@@ -174,6 +174,7 @@ namespace Utf8Json.Internal.DoubleConversion
         // C# constants
         static readonly byte[] infinity_symbol_ = StringEncoding.UTF8.GetBytes(double.PositiveInfinity.ToString());
         static readonly byte[] nan_symbol_ = StringEncoding.UTF8.GetBytes(double.NaN.ToString());
+        static readonly byte[] null_symbol_ = StringEncoding.UTF8.GetBytes("null");
 
         // constructor parameter, same as EcmaScriptConverter
         //DoubleToStringConverter(int flags,
@@ -621,24 +622,27 @@ namespace Utf8Json.Internal.DoubleConversion
             double value,
             ref StringBuilder result_builder)
         {
-            Double double_inspect = new Double(value);
-            if (double_inspect.IsInfinite())
-            {
-                if (infinity_symbol_ == null) return false;
-                if (value < 0)
-                {
-                    result_builder.AddCharacter((byte)'-');
-                }
-                result_builder.AddString(infinity_symbol_);
-                return true;
-            }
-            if (double_inspect.IsNan())
-            {
-                if (nan_symbol_ == null) return false;
-                result_builder.AddString(nan_symbol_);
-                return true;
-            }
-            return false;
+//            Double double_inspect = new Double(value);
+//            if (double_inspect.IsInfinite())
+//            {
+//                if (infinity_symbol_ == null) return false;
+//                if (value < 0)
+//                {
+//                    result_builder.AddCharacter((byte)'-');
+//                }
+//                result_builder.AddString(infinity_symbol_);
+//                return true;
+//            }
+//            if (double_inspect.IsNan())
+//            {
+//                if (nan_symbol_ == null) return false;
+//                result_builder.AddString(nan_symbol_);
+//                return true;
+//            }
+
+            result_builder.AddString(null_symbol_);
+            return true;
+//            return false;
         }
 
         static bool ToShortestIeeeNumber(
