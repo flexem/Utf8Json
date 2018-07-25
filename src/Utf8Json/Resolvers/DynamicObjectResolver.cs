@@ -29,6 +29,8 @@ namespace Utf8Json.Resolvers
         public static readonly IJsonFormatterResolver ExcludeNullCamelCase = DynamicObjectResolverAllowPrivateFalseExcludeNullTrueNameMutateCamelCase.Instance;
 
         public static readonly IJsonFormatterResolver ExcludeNullCamelCasePropertyValueByEnumUnderlyingValue = DynamicObjectResolverAllowPrivateFalseExcludeNullTrueNameMutateCamelCasePropertyValueByEnumUnderlyingValue.Instance;
+
+        public static readonly IJsonFormatterResolver ExcludeNullCamelCaseIncludingDictionaryKeyPropertyValueByEnumUnderlyingValue = DynamicObjectResolverAllowPrivateFalseExcludeNullTrueNameMutateCamelCaseIncludingDictionaryKeyEnumPropertyValueByUnderlyingValue.Instance;
         /// <summary>AllowPrivate:False, ExcludeNull:True,  NameMutate:SnakeCase</summary>
         public static readonly IJsonFormatterResolver ExcludeNullSnakeCase = DynamicObjectResolverAllowPrivateFalseExcludeNullTrueNameMutateSnakeCase.Instance;
 
@@ -302,6 +304,55 @@ namespace Utf8Json.Resolvers.Internal
         }
 
         DynamicObjectResolverAllowPrivateFalseExcludeNullTrueNameMutateCamelCasePropertyValueByEnumUnderlyingValue()
+        {
+        }
+
+#if DEBUG && (NET45 || NET47)
+        public AssemblyBuilder Save()
+        {
+            return assembly.Save();
+        }
+#endif
+
+        public IJsonFormatter<T> GetFormatter<T>()
+        {
+            return FormatterCache<T>.formatter;
+        }
+
+        static class FormatterCache<T>
+        {
+            public static readonly IJsonFormatter<T> formatter;
+
+            static FormatterCache()
+            {
+                if (typeof(T).IsEnum)
+                {
+                    formatter = (IJsonFormatter<T>)(object)new EnumFormatter<T>(false, true);
+                }
+                formatter = (IJsonFormatter<T>)DynamicObjectTypeBuilder.BuildFormatterToAssembly<T>(assembly, Instance, nameMutator, excludeNull);
+            }
+        }
+    }
+
+    internal sealed class DynamicObjectResolverAllowPrivateFalseExcludeNullTrueNameMutateCamelCaseIncludingDictionaryKeyEnumPropertyValueByUnderlyingValue : IJsonFormatterResolver
+#if DEBUG && (NET45 || NET47)
+        , ISave
+#endif
+    {
+        // configuration
+        public static readonly IJsonFormatterResolver Instance = new DynamicObjectResolverAllowPrivateFalseExcludeNullTrueNameMutateCamelCaseIncludingDictionaryKeyEnumPropertyValueByUnderlyingValue();
+        static readonly Func<string, string> nameMutator = StringMutator.ToCamelCase;
+        static readonly bool excludeNull = true;
+        const string ModuleName = "Utf8Json.Resolvers.DynamicObjectResolverAllowPrivateFalseExcludeNullTrueNameMutateCamelCaseIncludingDictionaryKeyEnumPropertyValueByUnderlyingValue";
+
+        static readonly DynamicAssembly assembly;
+
+        static DynamicObjectResolverAllowPrivateFalseExcludeNullTrueNameMutateCamelCaseIncludingDictionaryKeyEnumPropertyValueByUnderlyingValue()
+        {
+            assembly = new DynamicAssembly(ModuleName);
+        }
+
+        DynamicObjectResolverAllowPrivateFalseExcludeNullTrueNameMutateCamelCaseIncludingDictionaryKeyEnumPropertyValueByUnderlyingValue()
         {
         }
 
