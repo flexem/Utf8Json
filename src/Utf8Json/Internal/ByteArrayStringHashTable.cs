@@ -37,7 +37,12 @@ namespace Utf8Json.Internal
         {
             if (!TryAddInternal(key, value))
             {
-                throw new ArgumentException("Key was already exists. Key:" + key);
+                string skey;
+                if (key == null)
+                    skey = "(null)";
+                else
+                    skey = BitConverter.ToString(key);
+                throw new ArgumentException("Key was already exists. Key:" + skey);
             }
         }
 
