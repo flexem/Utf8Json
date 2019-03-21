@@ -38,6 +38,11 @@ namespace Utf8Json.Resolvers
         public static readonly IJsonFormatterResolver AllowPrivateExcludeNullCamelCase = AllowPrivateExcludeNullCamelCaseStandardResolver.Instance;
         /// <summary></summary>AllowPrivate:True,  ExcludeNull:True,  NameMutate:SnakeCase</summary>
         public static readonly IJsonFormatterResolver AllowPrivateExcludeNullSnakeCase = AllowPrivateExcludeNullSnakeCaseStandardResolver.Instance;
+
+        public static readonly IJsonFormatterResolver JsonNetCamelCase = new JsonNetCompatibleCamelCaseResolver();
+
+        public static readonly IJsonFormatterResolver JsonNetCamelCaseWithJavascriptTimestamp =
+            new JsonNetCompatibleCamelCaseWithJavascriptTimestampResolver();
     }
 }
 
